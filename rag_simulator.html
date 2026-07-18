@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive RAG Simulator</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent-blue: #38bdf8;
+            --accent-green: #34d399;
+            --accent-purple: #c084fc;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            max-width: 800px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        @media (min-width: 900px) {
+            .container {
+                grid-template-columns: 1fr 2fr;
+            }
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        textarea, input, select {
+            width: 100%;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            resize: vertical;
+        }
+
+        textarea:focus, input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        button {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            width: 100%;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        /* Pipeline Visualizer Styles */
+        .pipeline {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .step {
+            border-left: 4px solid var(--border);
+            padding-left: 1rem;
+            transition: border-color 0.5s ease;
+        }
+
+        .step.active {
+            border-left-color: var(--accent-blue);
+        }
+
+        .step-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: bold;
+            background-color: var(--border);
+        }
+
+        .step.active .badge-ingest { background-color: rgba(56, 189, 248, 0.2); color: var(--accent-blue); }
+        .step.active .badge-retrieve { background-color: rgba(52, 211, 153, 0.2); color: var(--accent-green); }
+        .step.active .badge-generate { background-color: rgba(192, 132, 252, 0.2); color: var(--accent-purple); }
+
+        .visual-display {
+            background-color: rgba(15, 23, 42, 0.6);
+            border-radius: 6px;
+            padding: 1rem;
+            min-height: 60px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            border: 1px solid transparent;
+        }
+
+        .step.active .visual-display {
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .chunk-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .chunk-box.highlighted {
+            border-color: var(--accent-green);
+            background: rgba(52, 211, 153, 0.05);
+        }
+
+        .vector-data {
+            color: var(--accent-blue);
+        }
+
+        .prompt-preview {
+            color: var(--text-muted);
+        }
+        .prompt-context {
+            color: var(--accent-green);
+            font-weight: bold;
+        }
+        .prompt-query {
+            color: var(--accent-blue);
+            font-weight: bold;
+        }
+        
+        #llm-response {
+            color: #f1f5f9;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Retrieval-Augmented Generation Simulator</h1>
+        <p class="subtitle">An interactive visual sandbox showing how Ingestion, Retrieval, and Generation work under the hood.</p>
+    </header>
+
+    <div class="container">
+        <!-- Interactive Controls -->
+        <div class="card">
+            <h2>Simulator Inputs</h2>
+            
+            <div class="input-group">
+                <label for="knowledge-base">1. Knowledge Base (Context Documents)</label>
+                <textarea id="knowledge-base" rows="8">Document A: The planet Mars is often called the Red Planet because of iron oxide on its surface. It has two small moons named Phobos and Deimos.
+
+Document B: Jupiter is the largest planet in our solar system. It is a gas giant known for its Great Red Spot, a massive storm bigger than Earth.
+
+Document C: The James Webb Space Telescope was launched in December 2021. It studies the history of our Universe using advanced infrared instruments.</textarea>
+            </div>
+
+            <div class="input-group">
+                <label for="user-query">2. Ask a Question</label>
+                <input type="text" id="user-query" value="What are the names of Mars' moons?">
+            </div>
+
+            <button onclick="runRAGSimulation()">Run RAG Pipeline</button>
+        </div>
+
+        <!-- Pipeline Visualization Output -->
+        <div class="card pipeline">
+            <h2>RAG Pipeline Execution</h2>
+
+            <!-- Step 1: Ingestion -->
+            <div class="step" id="step-ingest">
+                <div class="step-header">
+                    <span class="step-title">1. Ingestion (Chunking & Embedding)</span>
+                    <span class="badge badge-ingest">Vector Database</span>
+                </div>
+                <div class="visual-display" id="display-ingest">Click "Run RAG Pipeline" to initialize database...</div>
+            </div>
+
+            <!-- Step 2: Retrieval -->
+            <div class="step" id="step-retrieve">
+                <div class="step-header">
+                    <span class="step-title">2. Retrieval (Vector Similarity Search)</span>
+                    <span class="badge badge-retrieve">Matching Chunks</span>
+                </div>
+                <div class="visual-display" id="display-retrieve">Awaiting query embedding...</div>
+            </div>
+
+            <!-- Step 3: Generation -->
+            <div class="step" id="step-generate">
+                <div class="step-header">
+                    <span class="step-title">3. Generation (LLM Synthesis)</span>
+                    <span class="badge badge-generate">Final Answer</span>
+                </div>
+                <div class="visual-display" id="display-generate">Awaiting prompt construction...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // High-level mock data generator to simulate embedding vectors
+        function generateMockVector() {
+            let vec = [];
+            for(let i=0; i<4; i++) {
+                vec.push((Math.random() * 2 - 1).toFixed(2));
+            }
+            return `[${vec.join(', ')}]`;
+        }
+
+        function runRAGSimulation() {
+            // Clear previous states
+            document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+            
+            const kbText = document.getElementById('knowledge-base').value;
+            const query = document.getElementById('user-query').value;
+
+            if(!kbText.trim() || !query.trim()) {
+                alert("Please fill in both the Knowledge Base and the Question!");
+                return;
+            }
+
+            // --- STEP 1: INGESTION ---
+            const stepIngest = document.getElementById('step-ingest');
+            const displayIngest = document.getElementById('display-ingest');
+            stepIngest.classList.add('active');
+
+            // Split by lines to simulate document chunking
+            const chunks = kbText.split('\n').filter(chunk => chunk.trim() !== '');
+            let ingestHTML = `<strong>Chunked & Embedded Documents stored in Vector DB:</strong>\n\n`;
+            
+            chunks.forEach((chunk, index) => {
+                ingestHTML += `<div class="chunk-box" id="chunk-${index}"><strong>Chunk ${index + 1}:</strong> "${chunk}"\n<span class="vector-data">→ Embedding Vector: ${generateMockVector()}</span></div>`;
+            });
+            displayIngest.innerHTML = ingestHTML;
+
+            // --- STEP 2: RETRIEVAL (Simulated after a brief delay) ---
+            setTimeout(() => {
+                const stepRetrieve = document.getElementById('step-retrieve');
+                const displayRetrieve = document.getElementById('display-retrieve');
+                stepRetrieve.classList.add('active');
+
+                // Generate Mock Query Embedding
+                let retrieveHTML = `<span class="prompt-query">Query Embedding:</span> ${generateMockVector()}\n\n`;
+                retrieveHTML += `<strong>Calculating Cosine Similarity Score...</strong>\n`;
+
+                // Simple keyword scoring algorithm to determine the "most relevant" chunk realistically
+                let bestMatchIndex = 0;
+                let highestScore = -1;
+                
+                const queryWords = query.toLowerCase().split(' ');
+
+                chunks.forEach((chunk, index) => {
+                    let score = 0;
+                    queryWords.forEach(word => {
+                        if (word.length > 2 && chunk.toLowerCase().includes(word)) {
+                            score += 1; // Basic keyword match boost
+                        }
+                    });
+                    
+                    if (score > highestScore) {
+                        highestScore = score;
+                        bestMatchIndex = index;
+                    }
+                });
+
+                // Highlight the winner in Step 1 and populate Step 2
+                document.getElementById(`chunk-${bestMatchIndex}`).classList.add('highlighted');
+                
+                retrieveHTML += `🎯 <strong>Top Match Retrieved:</strong> Chunk ${bestMatchIndex + 1} (Highest Semantic Match)\n`;
+                retrieveHTML += `<div class="chunk-box highlighted">"${chunks[bestMatchIndex]}"</div>`;
+                displayRetrieve.innerHTML = retrieveHTML;
+
+                // --- STEP 3: GENERATION (Simulated after another brief delay) ---
+                setTimeout(() => {
+                    const stepGenerate = document.getElementById('step-generate');
+                    const displayGenerate = document.getElementById('display-generate');
+                    stepGenerate.classList.add('active');
+
+                    // Construct Augmented Prompt
+                    let promptHTML = `<strong>Constructed Prompt sent to LLM:</strong>\n`;
+                    promptHTML += `<span class="prompt-preview">Instructions: You are a helpful assistant. Answer the question using ONLY the context provided below.\n\n`;
+                    promptHTML += `Context:\n<span class="prompt-context">"${chunks[bestMatchIndex]}"</span>\n\n`;
+                    promptHTML += `Question:\n<span class="prompt-query">"${query}"</span>\n\n`;
+                    promptHTML += `Answer:</span>\n\n`;
+                    
+                    // Generate smart mock answer using simple heuristics from text
+                    let llmAnswer = "I cannot find the definitive answer in the provided context.";
+                    const lowerChunk = chunks[bestMatchIndex].toLowerCase();
+                    
+                    if (lowerChunk.includes("mars") && query.toLowerCase().includes("moon")) {
+                        llmAnswer = "Based on the provided context, Mars has two small moons named Phobos and Deimos.";
+                    } else if (lowerChunk.includes("jupiter") && query.toLowerCase().includes("spot")) {
+                        llmAnswer = "According to the context, Jupiter is known for its Great Red Spot, which is a massive storm bigger than Earth.";
+                    } else if (lowerChunk.includes("telescope") || lowerChunk.includes("webb")) {
+                        llmAnswer = "The James Webb Space Telescope was launched in December 2021 to study the history of our Universe using infrared instruments.";
+                    } else {
+                        // Fallback generic but smart response using the chunk itself
+                        llmAnswer = `Based on the retrieved context, we know that: ${chunks[bestMatchIndex]}`;
+                    }
+
+                    promptHTML += `<div id="llm-response">🤖 <strong>LLM:</strong> ${llmAnswer}</div>`;
+                    displayGenerate.innerHTML = promptHTML;
+
+                }, 800);
+            }, 800);
+        }
+    </script>
+</body>
+</html>
