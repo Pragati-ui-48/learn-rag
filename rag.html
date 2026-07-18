@@ -1,0 +1,241 @@
+┌──────────────────────────────────────────────┐
+│        Retrieval Augmented Generation        │
+│              Interactive Simulator           │
+└──────────────────────────────────────────────┘
+
+STEP 1
+Knowledge Base
+──────────────────────────────
+📄 AI is changing healthcare...
+📄 Machine learning requires...
+📄 Vector databases store...
+
+          ↓
+
+STEP 2
+Chunking
+──────────────────────────────
+Chunk 1
+Chunk 2
+Chunk 3
+Chunk 4
+Chunk 5
+
+          ↓
+
+STEP 3
+Generate Embeddings
+──────────────────────────────
+Chunk 1 → [0.82,0.11,0.45...]
+Chunk 2 → [0.91,0.03,0.22...]
+
+(Show colorful vectors instead of real numbers)
+
+          ↓
+
+STEP 4
+Store in Vector Database
+──────────────────────────────
+┌──────────────┐
+│ Vector DB    │
+│ ○ Chunk 1    │
+│ ○ Chunk 2    │
+│ ○ Chunk 3    │
+└──────────────┘
+
+          ↓
+
+STEP 5
+User Query
+──────────────────────────────
+"What is a vector database?"
+
+          ↓
+
+STEP 6
+Query Embedding
+──────────────────────────────
+Embedding:
+███████████
+
+          ↓
+
+STEP 7
+Similarity Search
+──────────────────────────────
+
+Chunk 1  92% ✅
+Chunk 2  78%
+Chunk 3  15%
+Chunk 4  88% ✅
+
+Highlight retrieved chunks.
+
+          ↓
+
+STEP 8
+Context Sent to LLM
+──────────────────────────────
+
+Prompt
+
+User:
+"What is a vector database?"
+
+Context:
+Chunk 1...
+Chunk 4...
+
+          ↓
+
+STEP 9
+LLM Response
+──────────────────────────────
+
+💬
+A vector database stores embeddings...
+
+Design
+
+Use a modern dark UI.
+
+Background: #0f172a
+Cards: #1e293b
+Accent: #4f46e5
+Success: #22c55e
+Rounded cards
+Glassmorphism
+Smooth animations
+Progress bar at top
+
+
+Animation Ideas
+
+When clicking Next:
+
+Knowledge Base
+
+⬇
+
+Chunks split apart
+
+⬇
+
+Vectors appear
+
+⬇
+
+Vectors move into database
+
+⬇
+
+Query enters
+
+⬇
+
+Similarity search highlights matches
+
+⬇
+
+Prompt builds itself
+
+⬇
+
+LLM types answer
+
+This makes the whole RAG pipeline feel alive.
+
+◀ Previous
+
+▶ Next Step
+
+🔄 Restart
+
+Also show
+
+Step 4 / 9
+
+Fake Embeddings
+
+Instead of real vectors, use colorful bars.
+
+Example
+
+Chunk 1
+
+███████░░░
+███░░░░░░
+████████░
+██░░░░░░░
+
+Embedding Generated ✓
+
+Much easier to understand.
+
+Fake Similarity Search
+
+Animate percentages.
+
+Chunk 1
+
+██████████ 92%
+
+Chunk 2
+
+███████░░░ 68%
+
+Chunk 3
+
+██░░░░░░░░ 18%
+
+Chunk 4
+
+█████████░ 89%
+
+Automatically highlight the top 2 chunks.
+
+Final Prompt Visualization
+
+Show exactly what the LLM receives.
+
+LLM INPUT
+
+---------------------------------
+
+SYSTEM
+
+You are a helpful assistant.
+
+---------------------------------
+
+CONTEXT
+
+Chunk 1:
+Vector databases store embeddings...
+
+Chunk 4:
+Similarity search retrieves...
+
+---------------------------------
+
+QUESTION
+
+What is a vector database?
+
+---------------------------------
+
+Then animate
+
+Thinking...
+
+Generating...
+
+Done.
+Final Answer
+💬
+
+A vector database stores embeddings
+and enables efficient similarity search,
+allowing RAG systems to retrieve the
+most relevant knowledge before asking
+the LLM to generate an answer.
